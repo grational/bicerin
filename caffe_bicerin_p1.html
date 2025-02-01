@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>La Consegna del Bicerin</title>
+	<style>
+		/* Stile ispirato all'atmosfera calda e antica di un caffè storico */
+		body {
+			background-color: #f8f1e1; /* Colore di sfondo chiaro, ricorda la schiuma del cappuccino */
+			color: #4d3d29; /* Testo marrone, richiama il colore del caffè */
+			font-family: "Georgia", serif;
+			margin: 20px;
+			line-height: 1.6;
+		}
+
+		h2 {
+			color: #4d3d29; 
+		}
+
+		strong {
+			color: #663300; /* Marrone più scuro per evidenziare il testo in grassetto */
+		}
+
+		p {
+			margin-bottom: 15px;
+		}
+
+		ul {
+			list-style-type: square; /* Puntini quadrati per la lista */
+			margin-left: 40px;
+		}
+
+		pre code {
+			background-color: #fff8dc; /* Colore simile alla carta pergamena */
+			padding: 10px;
+			border-radius: 5px;
+			display: block;
+			white-space: pre;
+			font-family: "Courier New", monospace;
+			border: 1px solid #e0dab5;
+		}
+	</style>
+</head>
+<body>
+	<h2><strong>La Consegna del Bicerin</strong></h2>
+
+	<p>
+		A Torino, tra le strade acciottolate e i palazzi storici, sorge il celebre <strong>Caffè Bicerin</strong>,
+		avvolto dal profumo di cioccolato e caffè e situato proprio sotto la Mole Antonelliana, simbolo della città.
+		Siete assidui frequentatori del locale e durante gli anni vi siete guadagnati la fama di uomini di ingegno.
+		Camillo il barista, si avvicina al vostro tavolo con aria preoccupata: ha qualcosa da sottoporvi,
+		certo che il vostro ingegno possa aiutarlo.
+	</p>
+
+	<p>
+		Camillo, il barista del Caffè Bicerin, è in difficoltà. Ogni mattina si trova a dover servire decine e decine
+		di clienti, ognuno con i propri ordini particolari e soprattutto, molta fretta e poca pazienza. Ogni bicerin
+		richiede un certo <strong>tempo di preparazione</strong> per essere preparato, e ogni cliente ha un
+		<strong>tempo massimo di attesa</strong> oltre il quale si lamenterà andando a danneggiare l'attività.
+	</p>
+	<p>
+		Camillo può servire un bicerin alla volta e vuole trovare l'ordine di consegna ottimale per
+		<strong>minimizzare il numero di clienti insoddisfatti</strong>.
+	</p>
+	<p>
+		Osservando la scena di come Camillo, visibilmente sudato, corre avanti e indietro fra i tavoli di clienti
+		che lo guardano in modo torvo decidete di aiutarlo anche per ricevere il vostro ordine in un tempo ragionevole.
+	</p>
+
+	<p>Di seguito un caso di esempio della situazione:</p>
+
+	<pre><code>4
+3 5
+2 3
+4 7
+1 2
+</code></pre>
+
+	<ul>
+		<li>4 ordini</li>
+		<li>Ogni riga: <em>(tempo_preparazione, tempo_massimo_attesa)</em></li>
+	</ul>
+
+	<p>
+		Il numero di clienti che non sarà possibile soddisfare in questo caso sarà <strong>2</strong>.
+	</p>
+
+	<p>
+	L'elenco completo degli ordini è disponibile <a href="caffe_bicerin_p1.input">qui</a>
+</body>
+</html>

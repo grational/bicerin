@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+//bin/true # {{{
+//bin/true && COMPILER="${GROOVY_HOME}/bin/groovy"
+//bin/true && SCRIPT_DIR="$(dirname $(readlink -f "${0}"))"
+//bin/true && PROXY_HOST="$(grep -oP '//\K[^:]+' <<<${http_proxy})"
+//bin/true && PROXY_PORT="${http_proxy##*:}"
+//bin/true && PROXY_PARAMS="-Dhttps.proxyHost=${PROXY_HOST} -Dhttps.proxyPort=${PROXY_PORT} -Dhttp.proxyHost=${PROXY_HOST} -Dhttp.proxyPort=${PROXY_PORT}"
+//bin/true && GRAPE_DEBUG='-Divy.message.logger.level=4 -Dgroovy.grape.report.downloads=true'
+//bin/true && SQL_PARAMS="-Djava.security.egd=file:/dev/urandom"
+//bin/true && LOG_PARAMS='-Dorg.slf4j.simpleLogger.defaultLogLevel=WARN'
+//bin/true && exec "${COMPILER}" -cp "${SCRIPT_DIR}/lib" ${PROXY_PARAMS} "${0}" "${@}"; exit $?
+// }}}
+@Grab('org.spockframework:spock-core:2.3-groovy-4.0')
+import spock.lang.*
+import it.grational.log.Logger
+
+class ScriptSpec extends Specification {
+
+	@Shared def script
+	@Shared String baseName
+
+	def setupSpec() {
+		baseName = myPath().replaceFirst(/-[^-]+$/,'')
+		String scriptPath = "${baseName}.gy"
+		script = new GroovyShell().parse (
+			new File(scriptPath)
+		)
+	}
+
+	String myPath() {
+		getClass()
+			.protectionDomain
+			.codeSource
+			.location
+			.path
+	}
+
+	@Unroll
+	def "Should give the correct answer given the sample #sample"() {
+		given:
+			File temp = tempFile()
+			temp.write(multiline(sample))
+
+		when: 
+			def mine = algo('mine', temp)
+		then:
+			mine.run() == expected
+
+		when:
+			def moore = algo('moore', temp)
+		then:
+			moore.run() == expected
+
+		where:
+			sample                         || expected
+			[ '2 1' ]                      || 0
+			[ '1 2' ]                      || 1
+			[ '3 5', '2 3', '4 6', '1 2' ] || 2
+			[ '3 5', '2 3', '4 7', '1 2' ] || 3
+			[ '1 10', '5 6' ]              || 2
+			[ '1 10', '20 22' ]            || 2
+  }
+
+  private File tempFile() {
+		File tf = File.createTempFile('temp_', '.tmp')
+		tf.deleteOnExit()
+		return tf
+  }
+
+  private multiline(List lines) {
+		StringBuilder sb = new StringBuilder()
+		sb.append(lines.size()).append('\n')
+		lines.each { line ->
+			sb.append(line).append('\n')
+		}
+		return sb.toString()
+  }
+
+  private def algo(String algorithm, File input) {
+		script.getClass().classLoader
+			.loadClass('Main').newInstance (
+				input: input,
+				algorithm: algorithm
+			)
+  }
+
+}

@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+//bin/true # {{{
+//bin/true && COMPILER="${GROOVY_HOME}/bin/groovy"
+//bin/true && SCRIPT_DIR="$(dirname $(readlink -f "${0}"))"
+//bin/true && PROXY_HOST="$(grep -oP '//\K[^:]+' <<<${http_proxy})"
+//bin/true && PROXY_PORT="${http_proxy##*:}"
+//bin/true && PROXY_PARAMS="-Dhttps.proxyHost=${PROXY_HOST} -Dhttps.proxyPort=${PROXY_PORT} -Dhttp.proxyHost=${PROXY_HOST} -Dhttp.proxyPort=${PROXY_PORT}"
+//bin/true && GRAPE_DEBUG='-Divy.message.logger.level=4 -Dgroovy.grape.report.downloads=true'
+//bin/true && SQL_PARAMS="-Djava.security.egd=file:/dev/urandom"
+//bin/true && LOG_PARAMS='-Dorg.slf4j.simpleLogger.defaultLogLevel=WARN'
+//bin/true && exec "${COMPILER}" -cp "${SCRIPT_DIR}/lib" ${PROXY_PARAMS} "${0}" "${@}"; exit $?
+// }}}
+
+// imports {{{
+import it.grational.entity.Orders
+import it.grational.entity.Order
+import it.grational.log.Logger
+// }}}
+
+// cli {{{
+if ( args.size() < 1 )
+	die "${this.class.simpleName} <input.file> [algorithm=mine|moore] [debug=false]"
+
+new Main (
+	input: new File(args[0]),
+	algorithm: (
+		args.size() > 1 && args[1] in ['mine', 'moore']
+	) ? args[1] : 'mine',
+	logger: new Logger (
+		(args.size() > 2) ? args[2].toBoolean() : false
+	),
+).run()
+// }}}
+
+// business code {{{
+class Main {
+	File input
+	Logger logger = new Logger()
+	String algorithm
+
+	int run() {
+		boolean first = true
+		Orders orders = new Orders(logger: logger)
+		input.readLines().eachWithIndex { line, idx ->
+			if (first) { first=false; return }
+
+			def split = line.split(' ')
+			orders << new Order (
+				id: idx,
+				preparation: split[0].toInteger(),
+				deadline: split[1].toInteger()
+			) 
+		}
+
+		int result = this."$algorithm"(orders)
+		logger.info "result: ${result}"
+		return result
+	}
+
+	int mine(Orders orders) {
+		orders.sort { order -> order.preparation }
+
+		Order best
+		int result = 0
+		int timeSpent = 0
+		logger.debug "result (${result.getClass()}) -> ${result}"
+		while ( (best = orders.popBest(timeSpent)) ) {
+			logger.debug "best (${best.getClass()}) -> ${best}"
+			logger.debug "orders (${orders.getClass()}) -> ${orders}"
+			timeSpent += best.preparation
+			result++
+			logger.debug "result (${result.getClass()}) -> ${result}\n"
+		}
+
+		return result
+	}
+
+	int moore(Orders orders) {
+		orders.sort { order -> order.deadline }
+
+		Orders delivered = orders.inject(new Orders()) { acc, order ->
+			acc << order
+			if ( acc.preparation > order.deadline ) {
+				def max = acc.max { it.preparation }
+				logger.debug (
+					"Can't deliver order ${order} in time, removing ${max}"
+				)
+				acc.remove(max)
+			}
+
+			return acc
+		}
+
+		if ( logger.debug() )
+			delivered.each {
+				logger.debug it.toString()
+			}
+
+		return delivered.size()
+	}
+
+}
+// }}}
+
+// support code {{{
+void die(String message, int code = -1) {
+	System.err.println message 
+	System.exit code
+}
+// }}}
+// vim: fdm=marker:ft=groovy
